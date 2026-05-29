@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Analytics — Hospital Readmission AI</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body { background: #f0f4f8; font-family: 'Segoe UI', sans-serif; }
+        .navbar { background: #0d47a1 !important; }
+        .nav-link-custom { color: white; text-decoration: none; padding: 8px 15px; border-radius: 8px; font-size: 0.9rem; }
+        .nav-link-custom:hover { background: rgba(255,255,255,0.2); color: white; }
+        .card { border: none; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.08); }
+        .metric-card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            text-align: center;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+        }
+        .metric-number { font-size: 2.5rem; font-weight: 700; }
+        .metric-label { color: #78909c; font-size: 0.9rem; margin-top: 5px; }
+        .table th { background: #1565c0; color: white; font-weight: 500; }
+        .badge-high { background: #ef5350; }
+        .badge-medium { background: #ffa726; }
+        .badge-low { background: #66bb6a; }
+    </style>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav class="navbar navbar-dark">
+    <div class="container">
+        <span class="navbar-brand fw-bold">
+            <i class="fas fa-hospital-user me-2"></i>Hospital Readmission AI
+        </span>
+        <div class="d-flex gap-2">
+            <a href="/" class="nav-link-custom"><i class="fas fa-home me-1"></i>Home</a>
+            <a href="/analytics" class="nav-link-custom"><i class="fas fa-chart-bar me-1"></i>Analytics</a>
+            <a href="/model" class="nav-link-custom"><i class="fas fa-brain me-1"></i>Model</a>
+        </div>
+    </div>
+</nav>
+
+<div class="container py-4">
+
+    <div class="text-center mb-4">
+        <h2 class="fw-bold" style="color: #1a237e;">
+            <i class="fas fa-chart-bar me-2"></i>Live Analytics Dashboard
+        </h2>
+        <p class="text-muted">Real-time prediction statistics from MySQL database</p>
+    </div>
+
+    <!-- METRIC CARDS -->
+    <div class="row g-3 mb-4">
+        <div class="col-6 col-md-3">
+            <div class="metric-card">
+                <div class="metric-number" style="color: #1565c0;">{{ total }}</div>
+                <div class="metric-label">Total Predictions</div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="metric-card">
+                <div class="metric-number" style="color: #ef5350;">{{ high_risk }}</div>
+                <div class="metric-label">High Risk Patients</div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="metric-card">
+                <div class="metric-number" style="color: #ffa726;">{{ medium_risk }}</div>
+                <div class="metric-label">Medium Risk Patients</div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="metric-card">
+                <div class="metric-number" style="color: #66bb6a;">{{ low_risk }}</div>
+                <div class="metric-label">Low Risk Patients</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4 mb-4">
+
+        <!-- PIE CHART -->
+        <div class="col-md-5">
+            <div class="card">
+                <div class="card-body p-4">
+                    <h5 class="fw-bold mb-3" style="color: #1a237e;">
+                        <i class="fas fa-chart-pie me-2"></i>Risk Distribution
+                    </h5>
+                    <canvas id="riskPieChart" height="250"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- SHAP CHART -->
+        <div class="col-md-7">
+            <div class="card">
+                <div class="card-body p-4">
+                    <h5 class="fw-bold mb-3" style="color: #1a237e;">
+                        <i class="fas fa-brain me-2"></i>Top Predictive Features
+                    </h5>
+                    <img src="/static/shap_global.png"
+                         alt="SHAP Feature Importance"
+                         class="img-fluid" style="border-radius: 8px;">
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- RECENT PREDICTIONS TABLE -->
+    <div class="card">
+        <div class="card-body p-4">
+            <h5 class="fw-bold mb-3" style="color: #1a237e;">
+                <i class="fas fa-history me-2"></i>Recent Predictions
+            </h5>
+            {% if total == 0 %}
+            <div class="text-center py-5">
+                <i class="fas fa-database fa-3x text-muted mb-3"></i>
+                <p class="text-muted">No predictions yet. Make your first prediction!</p>
+                <a href="/" class="btn btn-primary">Make Prediction</a>
+            </div>
+            {% else %}
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Date & Time</th>
+                            <th>Risk Level</th>
+                            <th>Risk Score</th>
+                            <th>Time in Hospital</th>
+                            <th>Medications</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for row in recent %}
+                        <tr>
+                            <td>{{ row[0] }}</td>
+                            <td>
+                                {% if row[1] == 'High Risk' %}
+                                <span class="badge badge-high">High Risk</span>
+                                {% elif row[1] == 'Medium Risk' %}
+                                <span class="badge badge-medium">Medium Risk</span>
+                                {% else %}
+                                <span class="badge badge-low">Low Risk</span>
+                                {% endif %}
+                            </td>
+                            <td>{{ "%.1f"|format(row[2] * 100) }}%</td>
+                            <td>{{ row[3] }} days</td>
+                            <td>{{ row[4] }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+</div>
+
+<script>
+// Pie Chart
+const ctx = document.getElementById('riskPieChart').getContext('2d');
+new Chart(ctx, {
+    type: 'doughnut',
+    data: {
+        labels: ['High Risk', 'Medium Risk', 'Low Risk'],
+        datasets: [{
+            data: [{{ high_risk }}, {{ medium_risk }}, {{ low_risk }}],
+            backgroundColor: ['#ef5350', '#ffa726', '#66bb6a'],
+            borderWidth: 2,
+            borderColor: '#fff'
+        }]
+    },
+    options: {
+        responsive: true,
+        plugins: {
+            legend: { position: 'bottom' }
+        }
+    }
+});
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

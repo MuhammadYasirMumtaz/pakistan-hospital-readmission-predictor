@@ -1,0 +1,20 @@
+# Data files (too large for GitHub)
+data/diabetic_data.csv
+data/clean_data_readable.csv
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+
+# Jupyter checkpoints
+.ipynb_checkpoints/
+
+# VS Code settings
+.vscode/
+
+# Environment variables
+.env
+
+# Logs
+*.log

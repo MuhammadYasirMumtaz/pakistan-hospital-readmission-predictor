@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Model Performance — Hospital Readmission AI</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body { background: #f0f4f8; font-family: 'Segoe UI', sans-serif; }
+        .navbar { background: #0d47a1 !important; }
+        .nav-link-custom { color: white; text-decoration: none; padding: 8px 15px; border-radius: 8px; font-size: 0.9rem; }
+        .nav-link-custom:hover { background: rgba(255,255,255,0.2); color: white; }
+        .card { border: none; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.08); }
+        .metric-card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            text-align: center;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+        }
+        .metric-number { font-size: 2.2rem; font-weight: 700; color: #1565c0; }
+        .metric-label { color: #78909c; font-size: 0.85rem; margin-top: 5px; }
+        .progress { height: 12px; border-radius: 6px; }
+        .card-header-custom {
+            background: linear-gradient(135deg, #1565c0, #1976d2);
+            color: white;
+            border-radius: 15px 15px 0 0;
+            padding: 15px 20px;
+            font-weight: 600;
+        }
+        .comparison-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        .comparison-label { color: #546e7a; font-size: 0.9rem; font-weight: 500; }
+        .winner-badge { background: #e8f5e9; color: #2e7d32; padding: 3px 10px; border-radius: 20px; font-size: 0.8rem; font-weight: 600; }
+        .loser-badge { background: #fce4ec; color: #c62828; padding: 3px 10px; border-radius: 20px; font-size: 0.8rem; }
+    </style>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav class="navbar navbar-dark">
+    <div class="container">
+        <span class="navbar-brand fw-bold">
+            <i class="fas fa-hospital-user me-2"></i>Hospital Readmission AI
+        </span>
+        <div class="d-flex gap-2">
+            <a href="/" class="nav-link-custom"><i class="fas fa-home me-1"></i>Home</a>
+            <a href="/analytics" class="nav-link-custom"><i class="fas fa-chart-bar me-1"></i>Analytics</a>
+            <a href="/model" class="nav-link-custom"><i class="fas fa-brain me-1"></i>Model</a>
+        </div>
+    </div>
+</nav>
+
+<div class="container py-4">
+
+    <div class="text-center mb-4">
+        <h2 class="fw-bold" style="color: #1a237e;">
+            <i class="fas fa-brain me-2"></i>Model Performance
+        </h2>
+        <p class="text-muted">CatBoost classifier evaluation metrics and comparison</p>
+    </div>
+
+    <!-- METRIC CARDS -->
+    <div class="row g-3 mb-4">
+        <div class="col-6 col-md-3">
+            <div class="metric-card">
+                <div class="metric-number">0.68</div>
+                <div class="metric-label">AUC-ROC Score</div>
+                <div class="progress mt-2">
+                    <div class="progress-bar bg-primary" style="width: 68%"></div>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="metric-card">
+                <div class="metric-number">73.6%</div>
+                <div class="metric-label">Accuracy</div>
+                <div class="progress mt-2">
+                    <div class="progress-bar bg-success" style="width: 73.6%"></div>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="metric-card">
+                <div class="metric-number">48.4%</div>
+                <div class="metric-label">Recall</div>
+                <div class="progress mt-2">
+                    <div class="progress-bar bg-warning" style="width: 48.4%"></div>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="metric-card">
+                <div class="metric-number">20.7%</div>
+                <div class="metric-label">Precision</div>
+                <div class="progress mt-2">
+                    <div class="progress-bar bg-info" style="width: 20.7%"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4 mb-4">
+
+        <!-- MODEL DETAILS -->
+        <div class="col-md-6">
+            <div class="card h-100">
+                <div class="card-header-custom">
+                    <i class="fas fa-cogs me-2"></i>Model Configuration
+                </div>
+                <div class="card-body p-4">
+                    <table class="table table-borderless">
+                        <tr>
+                            <td class="text-muted">Algorithm</td>
+                            <td class="fw-bold">CatBoost Classifier</td>
+                        </tr>
+                        <tr>
+                            <td class="text-muted">Iterations</td>
+                            <td class="fw-bold">3000 (early stopped)</td>
+                        </tr>
+                        <tr>
+                            <td class="text-muted">Learning Rate</td>
+                            <td class="fw-bold">0.01</td>
+                        </tr>
+                        <tr>
+                            <td class="text-muted">Depth</td>
+                            <td class="fw-bold">4</td>
+                        </tr>
+                        <tr>
+                            <td class="text-muted">Class Weights</td>
+                            <td class="fw-bold">[1, 3]</td>
+                        </tr>
+                        <tr>
+                            <td class="text-muted">Decision Threshold</td>
+                            <td class="fw-bold">0.31</td>
+                        </tr>
+                        <tr>
+                            <td class="text-muted">Training Records</td>
+                            <td class="fw-bold">101,766 patients</td>
+                        </tr>
+                        <tr>
+                            <td class="text-muted">Features</td>
+                            <td class="fw-bold">52 (including 5 engineered)</td>
+                        </tr>
+                        <tr>
+                            <td class="text-muted">Categorical Features</td>
+                            <td class="fw-bold">34 (handled natively)</td>
+                        </tr>
+                        <tr>
+                            <td class="text-muted">Train/Test Split</td>
+                            <td class="fw-bold">80% / 20%</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- CATBOOST VS XGBOOST -->
+        <div class="col-md-6">
+            <div class="card h-100">
+                <div class="card-header-custom">
+                    <i class="fas fa-balance-scale me-2"></i>CatBoost vs XGBoost
+                </div>
+                <div class="card-body p-4">
+                    <div class="comparison-row">
+                        <span class="comparison-label">AUC-ROC</span>
+                        <div class="d-flex gap-2">
+                            <span class="winner-badge">CatBoost 0.6835</span>
+                            <span class="loser-badge">XGBoost 0.6795</span>
+                        </div>
+                    </div>
+                    <div class="comparison-row">
+                        <span class="comparison-label">Recall</span>
+                        <div class="d-flex gap-2">
+                            <span class="winner-badge">CatBoost 48.39%</span>
+                            <span class="loser-badge">XGBoost 43.20%</span>
+                        </div>
+                    </div>
+                    <div class="comparison-row">
+                        <span class="comparison-label">Accuracy</span>
+                        <div class="d-flex gap-2">
+                            <span class="loser-badge">CatBoost 73.58%</span>
+                            <span class="winner-badge">XGBoost 75.78%</span>
+                        </div>
+                    </div>
+                    <div class="comparison-row">
+                        <span class="comparison-label">F1 Score</span>
+                        <div class="d-flex gap-2">
+                            <span class="winner-badge">CatBoost 0.2902</span>
+                            <span class="loser-badge">XGBoost 0.2860</span>
+                        </div>
+                    </div>
+                    <div class="comparison-row">
+                        <span class="comparison-label">Categorical Handling</span>
+                        <div class="d-flex gap-2">
+                            <span class="winner-badge">CatBoost Native</span>
+                            <span class="loser-badge">XGBoost Encoded</span>
+                        </div>
+                    </div>
+                    <div class="alert alert-success mt-3 py-2" style="font-size: 0.85rem;">
+                        <i class="fas fa-trophy me-1"></i>
+                        <strong>CatBoost selected</strong> — higher AUC and recall with native categorical handling for 65% categorical features.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- SHAP CHARTS -->
+    <div class="card mb-4">
+        <div class="card-header-custom">
+            <i class="fas fa-chart-bar me-2"></i>SHAP Feature Importance
+        </div>
+        <div class="card-body p-4">
+            <p class="text-muted" style="font-size: 0.85rem;">
+                SHAP (SHapley Additive exPlanations) shows the average impact of each feature
+                on the model's predictions across all patients.
+            </p>
+            <div class="text-center">
+                <img src="/static/shap_global.png"
+                     alt="SHAP Global Feature Importance"
+                     class="img-fluid" style="max-width: 900px; border-radius: 10px;">
+            </div>
+        </div>
+    </div>
+
+    <!-- WHY THESE METRICS -->
+    <div class="card mb-4">
+        <div class="card-header-custom">
+            <i class="fas fa-info-circle me-2"></i>Why These Metrics Matter
+        </div>
+        <div class="card-body p-4">
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <div class="alert alert-primary py-3">
+                        <h6 class="fw-bold"><i class="fas fa-chart-line me-2"></i>AUC-ROC: 0.68</h6>
+                        <p class="mb-0" style="font-size: 0.85rem;">
+                            Measures how well the model separates high-risk from low-risk patients.
+                            Our 0.68 is consistent with published research benchmarks of 0.65-0.72
+                            for hospital readmission prediction on this dataset.
+                        </p>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="alert alert-warning py-3">
+                        <h6 class="fw-bold"><i class="fas fa-bullseye me-2"></i>Recall: 48.4%</h6>
+                        <p class="mb-0" style="font-size: 0.85rem;">
+                            Of all actual high-risk patients, the model correctly identifies 48.4%.
+                            In a hospital processing 1,000 patients, this catches 484 high-risk
+                            patients who need extra care before discharge.
+                        </p>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="alert alert-danger py-3">
+                        <h6 class="fw-bold"><i class="fas fa-times-circle me-2"></i>Why Not Accuracy?</h6>
+                        <p class="mb-0" style="font-size: 0.85rem;">
+                            A model predicting everyone as "Low Risk" achieves 88% accuracy but
+                            catches zero high-risk patients. Accuracy is misleading on imbalanced
+                            medical datasets. AUC-ROC and Recall are the honest metrics.
+                        </p>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="alert alert-success py-3">
+                        <h6 class="fw-bold"><i class="fas fa-flask me-2"></i>Research Benchmark</h6>
+                        <p class="mb-0" style="font-size: 0.85rem;">
+                            Published research on this exact UCI dataset reports AUC of 0.58-0.72.
+                            Our 0.68 places us in the "Good Engineering" category, achieved through
+                            feature engineering, diagnosis grouping and CatBoost optimization.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

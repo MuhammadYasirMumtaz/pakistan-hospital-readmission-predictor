@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Pakistan Hospital Readmission Predictor</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body { background: #f0f4f8; font-family: 'Segoe UI', sans-serif; }
+        .hero {
+            background: linear-gradient(135deg, #1a237e 0%, #0d47a1 50%, #1565c0 100%);
+            color: white;
+            padding: 40px 0;
+            margin-bottom: 30px;
+        }
+        .hero h1 { font-size: 2rem; font-weight: 700; }
+        .hero p { font-size: 1rem; opacity: 0.9; }
+        .card { border: none; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.08); }
+        .card-header {
+            background: linear-gradient(135deg, #1565c0, #1976d2);
+            color: white;
+            border-radius: 15px 15px 0 0 !important;
+            padding: 15px 20px;
+            font-weight: 600;
+        }
+        .form-label { font-weight: 500; color: #37474f; font-size: 0.9rem; }
+        .form-control, .form-select {
+            border-radius: 8px;
+            border: 1.5px solid #e0e0e0;
+            font-size: 0.9rem;
+        }
+        .form-control:focus, .form-select:focus {
+            border-color: #1565c0;
+            box-shadow: 0 0 0 0.2rem rgba(21,101,192,0.15);
+        }
+        .btn-predict {
+            background: linear-gradient(135deg, #1565c0, #1976d2);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            padding: 12px 40px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            width: 100%;
+        }
+        .btn-predict:hover { background: linear-gradient(135deg, #0d47a1, #1565c0); color: white; }
+        .stat-card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+        }
+        .stat-card h3 { font-size: 1.8rem; font-weight: 700; color: #1565c0; }
+        .stat-card p { color: #78909c; margin: 0; font-size: 0.85rem; }
+        .nav-link-custom {
+            color: white;
+            text-decoration: none;
+            padding: 8px 15px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+        }
+        .nav-link-custom:hover { background: rgba(255,255,255,0.2); color: white; }
+        .section-divider {
+            border: none;
+            height: 2px;
+            background: linear-gradient(to right, #1565c0, transparent);
+            margin: 10px 0 20px 0;
+        }
+    </style>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav class="navbar navbar-dark" style="background: #0d47a1;">
+    <div class="container">
+        <span class="navbar-brand fw-bold">
+            <i class="fas fa-hospital-user me-2"></i>Hospital Readmission AI
+        </span>
+        <div class="d-flex gap-2">
+            <a href="/" class="nav-link-custom"><i class="fas fa-home me-1"></i>Home</a>
+            <a href="/analytics" class="nav-link-custom"><i class="fas fa-chart-bar me-1"></i>Analytics</a>
+            <a href="/model" class="nav-link-custom"><i class="fas fa-brain me-1"></i>Model</a>
+        </div>
+    </div>
+</nav>
+
+<!-- HERO -->
+<div class="hero">
+    <div class="container text-center">
+        <h1><i class="fas fa-heartbeat me-2"></i>Pakistan Hospital Readmission Predictor</h1>
+        <p>AI-powered 30-day readmission risk assessment for clinical decision support</p>
+        <div class="row justify-content-center mt-3 g-3">
+            <div class="col-6 col-md-3">
+                <div class="stat-card">
+                    <h3>101K+</h3>
+                    <p>Training Records</p>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="stat-card">
+                    <h3>0.68</h3>
+                    <p>AUC-ROC Score</p>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="stat-card">
+                    <h3>48%</h3>
+                    <p>Recall Rate</p>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="stat-card">
+                    <h3>SHAP</h3>
+                    <p>Explainable AI</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- MAIN FORM -->
+<div class="container pb-5">
+    <form action="/predict" method="POST">
+
+        <!-- PATIENT INFO -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <i class="fas fa-user-injured me-2"></i>Patient Information
+            </div>
+            <div class="card-body p-4">
+                <hr class="section-divider">
+                <div class="row g-3">
+                    <div class="col-md-3">
+                        <label class="form-label">Race</label>
+                        <select class="form-select" name="race">
+                            <option>Caucasian</option>
+                            <option>AfricanAmerican</option>
+                            <option>Hispanic</option>
+                            <option>Asian</option>
+                            <option>Other</option>
+                            <option>Unknown</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Gender</label>
+                        <select class="form-select" name="gender">
+                            <option>Male</option>
+                            <option>Female</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Age Group</label>
+                        <select class="form-select" name="age">
+                            <option>[0-10)</option>
+                            <option>[10-20)</option>
+                            <option>[20-30)</option>
+                            <option>[30-40)</option>
+                            <option>[40-50)</option>
+                            <option selected>[50-60)</option>
+                            <option>[60-70)</option>
+                            <option>[70-80)</option>
+                            <option>[80-90)</option>
+                            <option>[90-100)</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Weight</label>
+                        <select class="form-select" name="weight">
+                            <option selected>Unknown</option>
+                            <option>[0-25)</option>
+                            <option>[25-50)</option>
+                            <option>[50-75)</option>
+                            <option>[75-100)</option>
+                            <option>[100-125)</option>
+                            <option>[125-150)</option>
+                            <option>[150-175)</option>
+                            <option>[175-200)</option>
+                            <option>>200</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ADMISSION INFO -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <i class="fas fa-hospital me-2"></i>Admission Details
+            </div>
+            <div class="card-body p-4">
+                <hr class="section-divider">
+                <div class="row g-3">
+                    <div class="col-md-3">
+                        <label class="form-label">Admission Type</label>
+                        <select class="form-select" name="admission_type_id">
+                            <option value="1">Emergency</option>
+                            <option value="2">Urgent</option>
+                            <option value="3" selected>Elective</option>
+                            <option value="4">Newborn</option>
+                            <option value="5">Not Available</option>
+                            <option value="6">NULL</option>
+                            <option value="7">Trauma Center</option>
+                            <option value="8">Not Mapped</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Discharge Disposition</label>
+                        <select class="form-select" name="discharge_disposition_id">
+                            <option value="1" selected>Discharged to Home</option>
+                            <option value="2">Discharged to Another Hospital</option>
+                            <option value="3">Discharged to Skilled Nursing</option>
+                            <option value="4">Discharged to ICF</option>
+                            <option value="5">Discharged to Another Type</option>
+                            <option value="6">Discharged to Home Health</option>
+                            <option value="11">Expired</option>
+                            <option value="18">Not Available</option>
+                            <option value="25">Not Mapped</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Admission Source</label>
+                        <select class="form-select" name="admission_source_id">
+                            <option value="1">Physician Referral</option>
+                            <option value="2">Clinic Referral</option>
+                            <option value="3">HMO Referral</option>
+                            <option value="4">Transfer from Hospital</option>
+                            <option value="5">Transfer from SNF</option>
+                            <option value="6">Transfer from Another</option>
+                            <option value="7" selected>Emergency Room</option>
+                            <option value="8">Court/Law Enforcement</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Time in Hospital (days)</label>
+                        <input type="number" class="form-control" name="time_in_hospital"
+                               value="3" min="1" max="14">
+                    </div>
+                </div>
+                <div class="row g-3 mt-1">
+                    <div class="col-md-4">
+                        <label class="form-label">Payer Code</label>
+                        <select class="form-select" name="payer_code">
+                            <option selected>Unknown</option>
+                            <option>MC</option>
+                            <option>MD</option>
+                            <option>HM</option>
+                            <option>BC</option>
+                            <option>SP</option>
+                            <option>CP</option>
+                            <option>SI</option>
+                            <option>DM</option>
+                            <option>CH</option>
+                            <option>PO</option>
+                            <option>WC</option>
+                            <option>OT</option>
+                            <option>OG</option>
+                            <option>MP</option>
+                            <option>FR</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Medical Specialty</label>
+                        <select class="form-select" name="medical_specialty">
+                            <option selected>Unknown</option>
+                            <option>InternalMedicine</option>
+                            <option>Family/GeneralPractice</option>
+                            <option>Cardiology</option>
+                            <option>Surgery-General</option>
+                            <option>Orthopedics</option>
+                            <option>Gastroenterology</option>
+                            <option>Nephrology</option>
+                            <option>Orthopedics-Reconstructive</option>
+                            <option>Pulmonology</option>
+                            <option>Psychiatry</option>
+                            <option>Emergency/Trauma</option>
+                            <option>Urology</option>
+                            <option>ObstetricsandGynecology</option>
+                            <option>Radiology</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Primary Diagnosis Group</label>
+                        <select class="form-select" name="diag_1_group">
+                            <option>Circulatory</option>
+                            <option>Respiratory</option>
+                            <option>Digestive</option>
+                            <option>Diabetes</option>
+                            <option>Injury</option>
+                            <option selected>Other</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="row g-3 mt-1">
+                    <div class="col-md-6">
+                        <label class="form-label">Secondary Diagnosis Group</label>
+                        <select class="form-select" name="diag_2_group">
+                            <option>Circulatory</option>
+                            <option>Respiratory</option>
+                            <option>Digestive</option>
+                            <option>Diabetes</option>
+                            <option>Injury</option>
+                            <option selected>Other</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Tertiary Diagnosis Group</label>
+                        <select class="form-select" name="diag_3_group">
+                            <option>Circulatory</option>
+                            <option>Respiratory</option>
+                            <option>Digestive</option>
+                            <option>Diabetes</option>
+                            <option>Injury</option>
+                            <option selected>Other</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- CLINICAL METRICS -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <i class="fas fa-stethoscope me-2"></i>Clinical Metrics
+            </div>
+            <div class="card-body p-4">
+                <hr class="section-divider">
+                <div class="row g-3">
+                    <div class="col-md-3">
+                        <label class="form-label">Lab Procedures</label>
+                        <input type="number" class="form-control" name="num_lab_procedures"
+                               value="40" min="1" max="132">
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Procedures</label>
+                        <input type="number" class="form-control" name="num_procedures"
+                               value="1" min="0" max="6">
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Medications</label>
+                        <input type="number" class="form-control" name="num_medications"
+                               value="10" min="1" max="81">
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Number of Diagnoses</label>
+                        <input type="number" class="form-control" name="number_diagnoses"
+                               value="5" min="1" max="16">
+                    </div>
+                </div>
+                <div class="row g-3 mt-1">
+                    <div class="col-md-4">
+                        <label class="form-label">Outpatient Visits</label>
+                        <input type="number" class="form-control" name="number_outpatient"
+                               value="0" min="0" max="42">
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Emergency Visits</label>
+                        <input type="number" class="form-control" name="number_emergency"
+                               value="0" min="0" max="76">
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Inpatient Visits</label>
+                        <input type="number" class="form-control" name="number_inpatient"
+                               value="0" min="0" max="21">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- LAB RESULTS -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <i class="fas fa-flask me-2"></i>Lab Results & Medications
+            </div>
+            <div class="card-body p-4">
+                <hr class="section-divider">
+                <div class="row g-3">
+                    <div class="col-md-3">
+                        <label class="form-label">Max Glucose Serum</label>
+                        <select class="form-select" name="max_glu_serum">
+                            <option selected>None</option>
+                            <option>Norm</option>
+                            <option>>200</option>
+                            <option>>300</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">A1C Result</label>
+                        <select class="form-select" name="A1Cresult">
+                            <option selected>None</option>
+                            <option>Norm</option>
+                            <option>>7</option>
+                            <option>>8</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Insulin</label>
+                        <select class="form-select" name="insulin">
+                            <option selected>No</option>
+                            <option>Steady</option>
+                            <option>Up</option>
+                            <option>Down</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Metformin</label>
+                        <select class="form-select" name="metformin">
+                            <option selected>No</option>
+                            <option>Steady</option>
+                            <option>Up</option>
+                            <option>Down</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="row g-3 mt-1">
+                    <div class="col-md-3">
+                        <label class="form-label">Diabetes Medication</label>
+                        <select class="form-select" name="diabetesMed">
+                            <option selected>Yes</option>
+                            <option>No</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Medication Change</label>
+                        <select class="form-select" name="change">
+                            <option selected>No</option>
+                            <option>Ch</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Glipizide</label>
+                        <select class="form-select" name="glipizide">
+                            <option selected>No</option>
+                            <option>Steady</option>
+                            <option>Up</option>
+                            <option>Down</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Glyburide</label>
+                        <select class="form-select" name="glyburide">
+                            <option selected>No</option>
+                            <option>Steady</option>
+                            <option>Up</option>
+                            <option>Down</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SUBMIT -->
+        <div class="text-center mt-4">
+            <button type="submit" class="btn btn-predict">
+                <i class="fas fa-brain me-2"></i>Predict Readmission Risk
+            </button>
+            <p class="text-muted mt-2" style="font-size: 0.8rem;">
+                Powered by CatBoost + SHAP Explainable AI
+            </p>
+        </div>
+
+    </form>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
