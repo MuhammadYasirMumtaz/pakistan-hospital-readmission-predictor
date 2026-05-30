@@ -30,7 +30,7 @@ threshold = joblib.load("models/best_threshold.pkl")
 
 # DATABASE CONNECTION
 DB_PASSWORD = "admin123789"
-engine = create_engine(f"mysql+pymysql://root:{DB_PASSWORD}@localhost:3306/hospital_db")
+engine = create_engine(f"mysql+pymysql://root:{DB_PASSWORD}@192.168.18.31:3306/hospital_db")
 
 print("Model loaded successfully")
 print(f"Features: {len(feature_names)}")

@@ -1,0 +1,27 @@
+# Git
+.git
+.gitignore
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+
+# Jupyter notebooks (not needed in production)
+notebooks/
+
+# Large data files
+data/diabetic_data.csv
+data/clean_data_readable.csv
+
+# VS Code
+.vscode/
+
+# Power BI
+*.pbix
+
+# Logs
+*.log
+
+# Environment
+.env
