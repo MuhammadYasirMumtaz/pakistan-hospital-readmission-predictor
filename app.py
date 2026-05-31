@@ -28,9 +28,14 @@ model = joblib.load("models/readmission_model.pkl")
 feature_names = joblib.load("models/feature_names.pkl")
 threshold = joblib.load("models/best_threshold.pkl")
 
-# DATABASE CONNECTION
-DB_PASSWORD = "admin123789"
-engine = create_engine(f"mysql+pymysql://root:{DB_PASSWORD}@192.168.18.31:3306/hospital_db")
+# Use Railway MySQL in production, local MySQL in development
+DB_HOST = os.environ.get('MYSQLHOST', '192.168.18.31')
+DB_PORT = int(os.environ.get('MYSQLPORT', 3306))
+DB_USER = os.environ.get('MYSQLUSER', 'root')
+DB_PASSWORD = os.environ.get('MYSQLPASSWORD', 'admin123789')
+DB_NAME = os.environ.get('MYSQLDATABASE', 'hospital_db')
+
+engine = create_engine(f"mysql+pymysql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}")
 
 print("Model loaded successfully")
 print(f"Features: {len(feature_names)}")
